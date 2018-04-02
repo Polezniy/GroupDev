@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Magic : MonoBehaviour 
 {
+	static private testWindInteractScript anotherScript;	//base interactScript class
 
 	protected class baseMagic
 	{
@@ -17,7 +18,13 @@ public class Magic : MonoBehaviour
 	{
 		public override void interact (GameObject obj)
 		{
-			obj.SendMessage ("windMagicInteract");
+			if (obj.GetComponent<testWindInteractScript> () != null)
+			{
+				anotherScript = obj.GetComponent<testWindInteractScript> ();
+				anotherScript.windMagicInteract ();
+			}
+			// Do stuff if umbrella is equipped
+			// Do visual effects
 		}
 	}
 	class waterMagic : baseMagic
@@ -44,14 +51,14 @@ public class Magic : MonoBehaviour
 
 	List<baseMagic> currentMagic = new List<baseMagic>();
 
-	// Use this for initialization
+
 	void Start ()
 	{
+		//currentMagic.Add (new fireMagic());
 		currentMagic.Add (new windMagic());
 	}
-	
-	// Update is called once per frame
-	void Update () 
+
+	void Update()
 	{
 		if (Input.GetMouseButtonDown (0))
 		{
