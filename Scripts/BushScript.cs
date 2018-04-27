@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BushScript : testWindInteractScript {
+public class BushScript : magicInteractScript {
 	
 	public override void windMagicInteract()
 	{

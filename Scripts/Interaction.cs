@@ -5,81 +5,105 @@ using UnityEngine.UI;
 
 public class Interaction : MonoBehaviour
 {
-    public Transform trans; //Stone spawn position
-    public GameObject inv; //position of inventory
-    public bool carying; //flag to indicate if object is picked up
-    public Rigidbody rockPrefab;//rock
-    public Image imgPrefab;//image of rock
+	public Transform _stoneSpawn; //Stone spawn position in rockpile
+    public Transform _throwSpawn; //throwing start point
+	public GameObject inv; //position of inventory
+	public bool carying; //flag to indicate if object is picked up
+	public Rigidbody rockPrefab;//rock
+	public Image imgPrefab;//image of rock
+    public float force;//use the force Luke
+    public GameObject empty;
+	public Camera c;
 
-    private GameObject player;
-    private Camera view;
-    private Image imgInst;
-    private Rigidbody rockInst;
+	private GameObject player;
+    private GameObject rockpile;
+	private Image imgInst;
+	private Rigidbody rockInst;
+    private bool _spawned;
+
+
 
     // Use this for initialization
-    void Start()
-    {
-        view = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
-        player = GameObject.FindGameObjectWithTag("Player");
-
+    void Start () 
+	{
+		player = GameObject.FindGameObjectWithTag ("Player");
+        rockpile = GameObject.FindGameObjectWithTag("RockPile");
+        
         carying = false;
-    }
+        _spawned = false;
 
-    // Update is called once per frame
-    void Update()
-    {
-        Vector3 point = Input.mousePosition;
+		c = Camera.main;
+	}
 
-        Ray ray = view.ScreenPointToRay(point);
-        RaycastHit hit;
+	// Update is called once per frame
+	void Update ()
+	{
+        // Vector3 mousePos = new Vector3(Camera.main.ScreenToWorldPoint(Input.mousePosition).x, Camera.main.ScreenToWorldPoint(Input.mousePosition).y, 0);
 
-        if (Physics.Raycast(ray, out hit))
-        {
-            float dist = Vector3.Distance(hit.transform.gameObject.GetComponent<Transform>().position, player.GetComponent<Transform>().position);//distance between player and stone
+		//Vector3 mousePos = c.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, (c.pixelHeight - Input.mousePosition.y), c.nearClipPlane));
 
-            if (hit.collider.gameObject.tag == "Rock")
-            {
-                Debug.Log("STONE"); //DEBUG PURPOSES
+		//Debug.Log (mousePos);
 
-                if (Input.GetKeyDown(KeyCode.E) && dist < 1.4f)
-                {
-                    Destroy(hit.collider.gameObject);
+		//Vector3 mousePos = new Vector3(Input.mousePosition.x,Input.mousePosition.y, 0);
+        //Debug.Log(mousePos);
+       // empty.GetComponent<Transform>().position = mousePos;
 
-                    //creating icon of rock in the inventory window
+		if (rockpile)
+		{
+			float _rockpileDist = Vector3.Distance(rockpile.GetComponent<Transform>().position, player.GetComponent<Transform>().position); //distance between player and rockpile
 
-                    carying = true;//flag
+			if (Input.GetKeyDown(KeyCode.E) && _spawned == false && _rockpileDist < 1.2f) 
+			{
+				_spawned = true;
+				rockInst = Instantiate(rockPrefab, _stoneSpawn.position, _stoneSpawn.rotation) as Rigidbody;
+			}
 
-                    imgInst = Instantiate(imgPrefab, inv.transform.position, inv.transform.rotation);
-                    imgInst.transform.SetParent(inv.transform);
-                    imgInst.transform.localScale = new Vector3(1f, 1f, 0.5f);
 
-                }
+			if (Input.GetKeyDown(KeyCode.E) && carying == false && _spawned == true)
+			{
+				float _rockDist = Vector3.Distance(GameObject.FindGameObjectWithTag("Rock").GetComponent<Transform>().position, player.GetComponent<Transform>().position);//distance between player and stone
 
-            }
+				if (_rockDist < 1.4f)//picked up stone
+				{
 
-            ///WORK IN PROGRESS//
-            if (hit.collider.gameObject.tag == "RockPile")
-            {
-                Debug.Log("RockPile");
+					Destroy(GameObject.FindGameObjectWithTag("Rock"));
 
-                if (Input.GetKeyDown(KeyCode.E))
-                {
-                    Debug.Log("Spawned a rock");
-                }
-            }
-            ///WORK IN PROGRESS//
-        }
+					carying = true;//flag
 
-        if (Input.GetMouseButtonDown(1) && carying != false)
-        {
-            //FINAL//
-            rockInst = Instantiate(rockPrefab, trans.position, trans.rotation) as Rigidbody;
-            rockInst.AddForce(trans.forward * 150);//THROWING
+					//creating icon of rock in the inventory window
 
-            imgInst.transform.SetParent(null);
-            Destroy(GameObject.FindGameObjectWithTag("RockUI"));
-            carying = false;
+					//imgInst = Instantiate (imgPrefab, inv.transform.position, inv.transform.rotation);
+					//imgInst.transform.SetParent (inv.transform);
+					//imgInst.transform.localScale = new Vector3 (1f, 1f, 0.5f);
+				}
+				else if (_rockpileDist < 1.2f)
+				{
+					Destroy(GameObject.FindGameObjectWithTag("Rock"));
+					carying = true;
+				}
+			}
 
-        }
-    }
+			if (Input.GetMouseButtonDown (1) && carying)
+			{
+
+				// Debug.Log(empty.transform.position);
+
+				rockInst = Instantiate(rockPrefab, _throwSpawn.position, _throwSpawn.rotation) as Rigidbody;
+
+				//force = Vector2.Distance(_throwSpawn.position, );
+
+				//Debug.Log(Vector2.Distance(_throwSpawn.position, mousePos));
+
+				rockInst.AddForce(transform.forward * 300);//THROWING
+				rockInst.AddForce(transform.up * 400);//THROWING
+				//rockInst.AddForce(_throwSpawn.forward * force);//THROWING
+
+				//imgInst.transform.SetParent (null); //inventory
+				Destroy(GameObject.FindGameObjectWithTag("RockUI"));
+				carying = false;
+
+			}
+		}
+	}
+
 }
